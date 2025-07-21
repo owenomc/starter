@@ -1,28 +1,12 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import Navbar from './components/navbar';
 
 export default function LandingPage() {
   return (
     <main className="relative h-screen w-full snap-y snap-mandatory overflow-y-scroll scroll-smooth bg-[var(--background)] text-[var(--foreground)] font-sans">
-      {/* Header */}
-      <header className="fixed top-0 left-0 w-full z-50 px-6 py-4 flex justify-between items-center backdrop-blur-lg bg-white/60 shadow-sm">
-        <h1 className="text-2xl font-bold tracking-tight">Logitech G Pro X</h1>
-        <nav className="text-md hidden md:flex gap-8 font-medium">
-          <a href="#home" className="hover:text-blue-800 transition">
-            Home
-          </a>
-          <a href="#features" className="hover:text-blue-800 transition">
-            Features
-          </a>
-          <a href="#reviews" className="hover:text-blue-800 transition">
-            Reviews
-          </a>
-          <a href="#product" className="hover:text-blue-800 transition">
-            Product
-          </a>
-        </nav>
-      </header>
+      {/* <Navbar /> */}
 
       {/* Home Section */}
       <section
