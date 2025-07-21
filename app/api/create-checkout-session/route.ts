@@ -1,23 +1,18 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
-import { getUserFromSupabase } from '@/app/lib/supabaseServer'; // your helper to get user
+import { getUserFromSupabase } from '@/app/lib/supabaseServer';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil',
 });
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
-  }
-
+export async function POST(request: Request) {
   try {
-    const user = await getUserFromSupabase(req, res);
-    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+    const user = await getUserFromSupabase(request);
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    }
 
     const priceId = process.env.STRIPE_COURSE_PRICE_ID!;
-
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -29,9 +24,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout-cancel`,
     });
 
-    return res.status(200).json({ clientSecret: session.client_secret });
-  } catch (error: unknown) {
+    return new Response(JSON.stringify({ clientSecret: session.client_secret }), { status: 200 });
+  } catch (error) {
     console.error('Stripe Checkout session error:', error);
-    return res.status(500).json({ error: error instanceof Error ? error.message : 'Internal Server Error' });
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
   }
 }
