@@ -36,18 +36,12 @@ const Navbar = () => {
   }, []);
 
   const handleSignIn = () => {
-    // Automatically detect environment
-    const isDev = process.env.NODE_ENV === "development";
-    const siteUrl = isDev
-      ? "http://localhost:3000"
-      : "https://owenomc-starter.vercel.app";
-
     supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${siteUrl}/`,
+        redirectTo: `${window.location.origin}/`,
         queryParams: {
-          prompt: "select_account", // forces account picker
+          prompt: "select_account",
         },
       },
     });
