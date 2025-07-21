@@ -2,8 +2,8 @@ import React from "react";
 import "@/public/global.css";
 
 export const metadata = {
-  title: "LogitechGProX", // ← This sets the bookmark title
-  description: "Pure Power.",
+  title: "Starter", // ← This sets the bookmark title
+  description: "owenomc-starter", // ← This sets the bookmark description
 };
 
 export default function RootLayout({

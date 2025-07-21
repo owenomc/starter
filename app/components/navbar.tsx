@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase/client";
 import type { Session, AuthChangeEvent, User } from "@supabase/supabase-js";
+import BuyCourse from '../components/BuyCourse';
 
 const Navbar = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -136,6 +137,8 @@ const Navbar = () => {
                 </div>
               )}
             </div>
+
+            <BuyCourse />
 
             <button
               onClick={handleSignOut}
