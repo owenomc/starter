@@ -1,0 +1,31 @@
+/* styles/globals.css */
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --font-family: 'Helvetica';
+}
+
+html, body {
+  font-family: var(--font-family);
+}
+
+.background-image {
+  position: static;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media screen and (max-width: 991px) {
+  .background-image {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .background-image {
+    display: none;
+  }
+}
