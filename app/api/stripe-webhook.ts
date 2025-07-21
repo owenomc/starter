@@ -7,7 +7,7 @@ export const config = {
   api: { bodyParser: false }, // Required to verify raw body
 };
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil', // Or '2022-11-15' if on Stripe v12
 });
 
@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const event = stripe.webhooks.constructEvent(
       buf,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.NEXT_PUBLIC_STRIPE_WEBHOOK_SECRET!
     );
 
     if (event.type === 'checkout.session.completed') {
