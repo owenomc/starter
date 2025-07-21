@@ -6,7 +6,7 @@ import Navbar from './components/navbar';
 export default function LandingPage() {
   return (
     <main className="relative h-screen w-full snap-y snap-mandatory overflow-y-scroll scroll-smooth bg-[var(--background)] text-[var(--foreground)] font-sans">
-      {/* <Navbar /> */}
+      <Navbar />
 
       {/* Home Section */}
       <section
@@ -125,9 +125,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Product Section */}
+      {/* Products Section */}
       <section
-        id="product"
+        id="products"
         className="bg-gray-50 snap-start h-screen flex flex-col px-2 text-center"
       >
         <div className="flex-grow flex flex-col items-center justify-center">
