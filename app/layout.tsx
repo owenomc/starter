@@ -1,5 +1,6 @@
 import React from "react";
 import "@/public/global.css";
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata = {
   title: "Starter", // ← This sets the bookmark title
@@ -13,6 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Analytics/>
       <body
       >
         {children}
