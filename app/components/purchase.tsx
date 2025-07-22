@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { auth } from "../lib/firebaseClient";
+import { onAuthStateChanged } from "firebase/auth";
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-);
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 type PurchaseProps = {
   priceId: string;
@@ -14,7 +13,21 @@ type PurchaseProps = {
 };
 
 const Purchase: React.FC<PurchaseProps> = ({ priceId, label }) => {
+  const [uid, setUid] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setUid(user?.uid || null);
+    });
+    return () => unsub();
+  }, []);
+
   const handleClick = async () => {
+    if (!uid) {
+      alert("Please sign in before purchasing.");
+      return;
+    }
+
     try {
       const res = await fetch("/api/create-checkout-session", {
         method: "POST",
@@ -23,9 +36,10 @@ const Purchase: React.FC<PurchaseProps> = ({ priceId, label }) => {
           priceId,
           successUrl: `${window.location.origin}/success`,
           cancelUrl: `${window.location.origin}/cancel`,
-          userId: auth.currentUser?.uid || null, // Pass logged-in user's UID
+          userId: uid,
         }),
       });
+
       const data = await res.json();
 
       if (data.sessionId) {
