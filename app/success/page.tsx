@@ -7,12 +7,12 @@ export default function CancelPage() {
   const router = useRouter();
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen p-8 bg-red-50 dark:bg-red-900 text-red-900 dark:text-red-200">
-      <h1 className="text-4xl font-bold mb-4">Payment Cancelled</h1>
-      <p className="mb-4">Your payment was not completed.</p>
+    <main className="flex flex-col items-center justify-center min-h-screen p-8 bg-green-50 dark:bg-green-50 text-black-900 dark:text-black-200">
+      <h1 className="text-4xl font-bold mb-4">Payment Success</h1>
+      <p className="mb-4">Your payment has been proccessed.</p>
       <button
         onClick={() => router.push("/")}
-        className="px-6 py-2 rounded bg-red-700 hover:bg-red-800 text-white transition"
+        className="px-6 py-2 rounded bg-blue-700 hover:bg-blue-800 text-white transition"
       >
         Go Back Home
       </button>

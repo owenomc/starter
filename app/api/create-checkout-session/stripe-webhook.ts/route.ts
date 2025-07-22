@@ -1,5 +1,4 @@
-// app/api/stripe-webhook/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import admin from "firebase-admin";
 
@@ -7,7 +6,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-06-30.basil",
 });
 
-// Initialize Firebase Admin (server-side)
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.applicationDefault(),
@@ -15,53 +13,48 @@ if (!admin.apps.length) {
 }
 const firestore = admin.firestore();
 
-export async function POST(req: NextRequest) {
-  const signature = req.headers.get("stripe-signature");
-  const rawBody = await req.text();
+export async function POST(req: Request) {
+  const sig = req.headers.get("stripe-signature")!;
+  const body = await req.text();
 
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(
-      rawBody,
-      signature!,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err) {
-    console.error("Webhook signature error:", err);
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    console.error("⚠️ Webhook signature verification failed.", err);
+    return NextResponse.json({ error: "Webhook signature verification failed" }, { status: 400 });
   }
 
-  // Expand line items to know which product was purchased
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
+    const userId = session.client_reference_id;
 
-    try {
-      const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
-        expand: ["line_items.data.price.product"],
-      });
+    if (userId) {
+      try {
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id, { limit: 10 });
 
-      const userId = session.client_reference_id;
-      const priceId = fullSession.line_items?.data[0]?.price?.id;
+        const updates: Record<string, unknown> = {};
 
-      if (userId && priceId) {
-        const userRef = firestore.collection("users").doc(userId);
-
-        const coursePriceId = process.env.STRIPE_COURSE_PRICE_ID!;
-        const subscriptionPriceId = process.env.STRIPE_SUBSCRIPTION_PRICE_ID!;
-
-        if (priceId === coursePriceId) {
-          await userRef.update({ courseBought: true });
-        } else if (priceId === subscriptionPriceId) {
-          await userRef.update({
-            subscriptionActive: true,
-            subscriptionDate: admin.firestore.FieldValue.serverTimestamp(),
-          });
+        for (const item of lineItems.data) {
+          if (item.price?.id === process.env.STRIPE_PRICE_ID_COURSE) {
+            updates.courseBought = true;
+          }
+          if (item.price?.id === process.env.STRIPE_PRICE_ID_SUBSCRIPTION) {
+            updates.subscriptionActive = true;
+            updates.subscriptionDate = admin.firestore.FieldValue.serverTimestamp();
+          }
         }
+
+        if (Object.keys(updates).length > 0) {
+          const userDocRef = firestore.collection("users").doc(userId);
+          await userDocRef.update(updates);
+          console.log(`✅ Updated user ${userId} with`, updates);
+        }
+      } catch (err) {
+        console.error("❌ Error updating Firestore:", err);
+        return NextResponse.json({ error: "Failed to update Firestore" }, { status: 500 });
       }
-    } catch (err) {
-      console.error("Webhook processing error:", err);
-      return NextResponse.json({ error: "Failed to process webhook" }, { status: 500 });
     }
   }
 

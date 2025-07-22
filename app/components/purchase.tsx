@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { auth } from "../lib/firebaseClient";
-import { onAuthStateChanged } from "firebase/auth";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -13,21 +12,12 @@ type PurchaseProps = {
 };
 
 const Purchase: React.FC<PurchaseProps> = ({ priceId, label }) => {
-  const [uid, setUid] = useState<string | null>(null);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      setUid(user?.uid || null);
-    });
-    return () => unsub();
-  }, []);
-
   const handleClick = async () => {
-    if (!uid) {
-      alert("Please sign in before purchasing.");
+    const userId = auth.currentUser?.uid;
+    if (!userId) {
+      alert("You must be signed in to purchase");
       return;
     }
-
     try {
       const res = await fetch("/api/create-checkout-session", {
         method: "POST",
@@ -36,15 +26,13 @@ const Purchase: React.FC<PurchaseProps> = ({ priceId, label }) => {
           priceId,
           successUrl: `${window.location.origin}/success`,
           cancelUrl: `${window.location.origin}/cancel`,
-          userId: uid,
+          userId,
         }),
       });
-
       const data = await res.json();
-
       if (data.sessionId) {
         const stripe = await stripePromise;
-        if (!stripe) throw new Error("Stripe failed to load");
+        if (!stripe) throw new Error("Stripe.js failed to load");
         await stripe.redirectToCheckout({ sessionId: data.sessionId });
       } else {
         alert("Failed to create checkout session: " + data.error);

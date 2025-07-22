@@ -1,6 +1,5 @@
-// lib/firebaseClient.ts
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
@@ -12,16 +11,18 @@ const firebaseConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-  // Ensure these environment variables are set in your .env file
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+// Explicitly set persistence for auth
+setPersistence(auth, browserLocalPersistence).catch(console.error);
+
 const db = getFirestore(app);
 
 let analytics;
 if (typeof window !== "undefined") {
-  // Only run analytics in the browser
   analytics = getAnalytics(app);
 }
 
