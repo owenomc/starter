@@ -189,6 +189,11 @@ const Navbar: React.FC = () => {
                 label="Buy Subscription"
               />
 
+              <Purchase
+                priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_COURSE!}
+                label="Buy Course"
+              />
+
               <UserInfoDisplay
                 userId={user.uid}
                 displayName={displayNameEdit}

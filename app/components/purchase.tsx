@@ -2,8 +2,11 @@
 
 import React from "react";
 import { loadStripe } from "@stripe/stripe-js";
+import { auth } from "../lib/firebaseClient";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
 
 type PurchaseProps = {
   priceId: string;
@@ -18,9 +21,9 @@ const Purchase: React.FC<PurchaseProps> = ({ priceId, label }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           priceId,
-          successUrl: window.location.origin + "/success",
-          cancelUrl: window.location.origin + "/cancel",
-          // optionally add client_reference_id here if your API expects it
+          successUrl: `${window.location.origin}/success`,
+          cancelUrl: `${window.location.origin}/cancel`,
+          userId: auth.currentUser?.uid || null, // Pass logged-in user's UID
         }),
       });
       const data = await res.json();
